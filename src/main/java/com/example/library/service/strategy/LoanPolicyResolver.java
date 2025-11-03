@@ -1,18 +1,27 @@
-package com.example.library.service.strategy;
+package com.example.library.service;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
+import com.example.library.model.Borrower;
+import com.example.library.model.Book;
+import com.example.library.service.strategy.LoanPolicy;
+import com.example.library.service.strategy.StandardLoanPolicy;
 
-@Component
 public class LoanPolicyResolver {
-    private final ApplicationContext ctx;
-    public LoanPolicyResolver(ApplicationContext ctx) { this.ctx = ctx; }
 
-    public LoanPolicy resolve(String role) {
-        try {
-            return ctx.getBean(role.toUpperCase(), LoanPolicy.class);
-        } catch (Exception e) {
-            return ctx.getBean("STUDENT", LoanPolicy.class); // fallback
-        }
+    private LoanPolicy policy;
+
+    public LoanPolicyResolver() {
+        this.policy = new StandardLoanPolicy(); // default policy
+    }
+
+    public boolean canBorrow(Borrower borrower, Book book) {
+        return policy.canBorrow(borrower, book);
+    }
+
+    public void setPolicy(LoanPolicy policy) {
+        this.policy = policy;
+    }
+
+    public int getLoanDuration() {
+        return policy.getLoanDuration();
     }
 }

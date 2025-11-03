@@ -1,22 +1,19 @@
 package com.example.library.model;
 
-import jakarta.persistence.*;
-import lombok.*;
+import java.util.Date;
 
-import java.time.Instant;
-
-@Entity
-@Table(name = "hold_requests")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class HoldRequest {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne(optional = false)
     private Borrower borrower;
-
-    @ManyToOne(optional = false)
     private Book book;
+    private Date requestDate;
 
-    private Instant requestDate = Instant.now();
+    public HoldRequest(Borrower borrower, Book book, Date requestDate) {
+        this.borrower = borrower;
+        this.book = book;
+        this.requestDate = requestDate;
+    }
+
+    public Borrower getBorrower() { return borrower; }
+    public Book getBook() { return book; }
+    public Date getRequestDate() { return requestDate; }
 }

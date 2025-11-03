@@ -1,21 +1,19 @@
 package com.example.library.model;
 
-import jakarta.persistence.*;
-import lombok.*;
-
 import java.util.ArrayList;
-import java.util.List;
 
-@Entity
-@Table(name = "users")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
-public class Borrower {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Borrower extends Person {
+    private ArrayList<Loan> borrowedBooks = new ArrayList<>();
+    private ArrayList<HoldRequest> holdRequests = new ArrayList<>();
 
-    private String name;
-    private String role; // e.g. "STUDENT", "TEACHER", "STAFF", "ADMIN"
+    public Borrower(int id, String name, String address, int phone) {
+        super(id, name, address, phone);
+    }
 
-    @OneToMany(mappedBy = "borrower", cascade = CascadeType.ALL)
-    private List<Loan> borrowedLoans = new ArrayList<>();
+    public void addBorrowedBook(Loan loan) { borrowedBooks.add(loan); }
+    public ArrayList<Loan> getBorrowedBooks() { return borrowedBooks; }
+
+    public void addHoldRequest(HoldRequest hr) { holdRequests.add(hr); }
+    public void removeHoldRequest(HoldRequest hr) { holdRequests.remove(hr); }
+    public ArrayList<HoldRequest> getHoldRequests() { return holdRequests; }
 }

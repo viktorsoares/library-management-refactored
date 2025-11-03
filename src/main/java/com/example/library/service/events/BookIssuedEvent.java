@@ -1,16 +1,17 @@
 package com.example.library.service.events;
 
-import org.springframework.context.ApplicationEvent;
+import com.example.library.model.Book;
+import com.example.library.model.Borrower;
 
-public class BookIssuedEvent extends ApplicationEvent {
-    private final Long loanId;
-    private final Long bookId;
-    private final Long borrowerId;
-    public BookIssuedEvent(Object source, Long loanId, Long bookId, Long borrowerId) {
-        super(source);
-        this.loanId = loanId; this.bookId = bookId; this.borrowerId = borrowerId;
+public class BookIssuedEvent {
+    private Book book;
+    private Borrower borrower;
+
+    public BookIssuedEvent(Book book, Borrower borrower) {
+        this.book = book;
+        this.borrower = borrower;
     }
-    public Long getLoanId(){return loanId;}
-    public Long getBookId(){return bookId;}
-    public Long getBorrowerId(){return borrowerId;}
+
+    public Book getBook() { return book; }
+    public Borrower getBorrower() { return borrower; }
 }

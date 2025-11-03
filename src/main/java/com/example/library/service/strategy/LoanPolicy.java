@@ -4,6 +4,6 @@ import com.example.library.model.Borrower;
 import com.example.library.model.Book;
 
 public interface LoanPolicy {
-    int maxDays(Borrower user);
-    boolean canBorrow(Borrower user, Book book);
+    boolean canBorrow(Borrower borrower, Book book);
+    int getLoanDuration();
 }

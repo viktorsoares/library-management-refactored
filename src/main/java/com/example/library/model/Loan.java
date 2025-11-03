@@ -1,38 +1,36 @@
 package com.example.library.model;
 
-import jakarta.persistence.*;
-import lombok.*;
+import java.util.Date;
 
-import java.time.Instant;
-
-@Entity
-@Table(name = "loans")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Loan {
-    public enum State { CREATED, BORROWED, RETURNED, OVERDUE }
-
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne(optional = false)
     private Borrower borrower;
-
-    @ManyToOne(optional = false)
     private Book book;
+    private Staff issuer;
+    private Staff receiver;
+    private Date issuedDate;
+    private Date returnDate;
+    private boolean fineStatus;
 
-    @ManyToOne
-    private Borrower receiver; // staff who received return
+    public Loan(Borrower borrower, Book book, Staff issuer, Staff receiver, Date issuedDate, Date returnDate, boolean fineStatus) {
+        this.borrower = borrower;
+        this.book = book;
+        this.issuer = issuer;
+        this.receiver = receiver;
+        this.issuedDate = issuedDate;
+        this.returnDate = returnDate;
+        this.fineStatus = fineStatus;
+    }
 
-    private Instant issuedDate;
-    private Instant returnedDate;
+    public Borrower getBorrower() { return borrower; }
+    public Book getBook() { return book; }
+    public Staff getIssuer() { return issuer; }
+    public Staff getReceiver() { return receiver; }
+    public Date getIssuedDate() { return issuedDate; }
+    public Date getReturnDate() { return returnDate; }
+    public boolean getFineStatus() { return fineStatus; }
 
-    private boolean finePaid = false;
-
-    @Enumerated(EnumType.STRING)
-    private State state = State.CREATED;
-
-    // business helper (simple)
-    public void payFine() {
-        this.finePaid = true;
+    public double computeFine1() {
+        // placeholder: pode ser refatorado com Strategy Pattern
+        return 0;
     }
 }

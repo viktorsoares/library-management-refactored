@@ -1,35 +1,23 @@
 package com.example.library.factory;
 
-import com.example.library.model.Book;
-import com.example.library.model.Borrower;
-import com.example.library.model.Loan;
-
-import java.time.Instant;
+import com.example.library.model.*;
 
 public class EntityFactory {
 
-    public static Book createBook(String title, String subject, String author) {
-        Book b = new Book();
-        b.setTitle(title);
-        b.setSubject(subject);
-        b.setAuthor(author);
-        b.setIssued(false);
-        return b;
+    public static Person createPerson(String type, int id, String name, String address, int phone, double salaryOrZero, int deskOrOfficeNo) {
+        switch (type.toLowerCase()) {
+            case "clerk":
+                return new Clerk(id, name, address, phone, salaryOrZero, deskOrOfficeNo);
+            case "librarian":
+                return Librarian.addLibrarian(new Librarian(id, name, address, phone, salaryOrZero, deskOrOfficeNo)) ? Librarian.getInstance() : null;
+            case "borrower":
+                return new Borrower(id, name, address, phone);
+            default:
+                throw new IllegalArgumentException("Invalid person type");
+        }
     }
 
-    public static Borrower createBorrower(String name, String role) {
-        Borrower u = new Borrower();
-        u.setName(name);
-        u.setRole(role);
-        return u;
-    }
-
-    public static Loan createLoan(Borrower borrower, Book book) {
-        Loan l = new Loan();
-        l.setBorrower(borrower);
-        l.setBook(book);
-        l.setIssuedDate(Instant.now());
-        l.setState(Loan.State.BORROWED);
-        return l;
+    public static Book createBook(int id, String title, String subject, String author, boolean issued) {
+        return new Book(id, title, subject, author, issued);
     }
 }

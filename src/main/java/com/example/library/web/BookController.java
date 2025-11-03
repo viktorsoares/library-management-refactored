@@ -32,14 +32,13 @@ public class BookController {
     }
 
     @PostMapping("/{bookId}/issue")
-    public ResponseEntity<String> issue(@PathVariable Long bookId,
-                                        @RequestParam Long borrowerId,
-                                        @RequestParam Long staffId) {
-        return ResponseEntity.ok(facade.issue(bookId, borrowerId, staffId));
+    public ResponseEntity<String> issue(@PathVariable Long bookId) {
+        return ResponseEntity.ok(facade.issue(bookId));
     }
 
     @PostMapping("/return")
     public ResponseEntity<String> returnLoan(@RequestParam Long loanId, @RequestParam Long receiverId) {
         return ResponseEntity.ok(facade.returnLoan(loanId, receiverId));
     }
+
 }

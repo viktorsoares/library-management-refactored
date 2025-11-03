@@ -1,37 +1,45 @@
 package com.example.library.facade;
 
-import com.example.library.model.Book;
-import com.example.library.model.HoldRequest;
-import com.example.library.repository.BookRepository;
-import com.example.library.service.BookService;
-import org.springframework.stereotype.Component;
+import com.example.library.model.*;
+import com.example.library.service.LoanPolicyResolver;
+import com.example.library.service.listener.EventListener;
+import com.example.library.service.events.BookIssuedEvent;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.ArrayList;
 
-@Component
 public class LibraryFacade {
-    private final BookService bookService;
-    private final BookRepository bookRepository;
 
-    public LibraryFacade(BookService bookService, BookRepository bookRepository) {
-        this.bookService = bookService;
-        this.bookRepository = bookRepository;
+    private ArrayList<Book> books;
+    private ArrayList<Person> persons;
+    private LoanPolicyResolver loanPolicyResolver;
+    private ArrayList<EventListener> listeners;
+
+    public LibraryFacade(ArrayList<Book> books, ArrayList<Person> persons) {
+        this.books = books;
+        this.persons = persons;
+        this.loanPolicyResolver = new LoanPolicyResolver();
+        this.listeners = new ArrayList<>();
     }
 
-    public Book addBook(Book book) {
-        return bookService.addBook(book);
+    public void addListener(EventListener listener) {
+        listeners.add(listener);
     }
 
-    public List<Book> listBooks() {
-        return bookService.listBooks();
+    public void issueBook(Borrower borrower, Book book) {
+        if (!loanPolicyResolver.canBorrow(borrower, book)) {
+            System.out.println("Cannot issue book due to policy constraints.");
+            return;
+        }
+
+        book.setIssuedStatus(true);
+        Loan loan = new Loan(borrower, book, null, null, new java.util.Date(), null, false);
+        borrower.addBorrowedBook(loan);
+
+        BookIssuedEvent event = new BookIssuedEvent(book, borrower);
+        for (EventListener listener : listeners) {
+            listener.onBookIssued(event);
+        }
+
+        System.out.println("Book issued successfully!");
     }
-
-    public Optional<Book> findBook(Long id) { return bookService.findById(id); }
-
-    public HoldRequest placeHold(Long bookId, Long borrowerId) { return bookService.placeHold(bookId, borrowerId); }
-
-    public String issue(Long bookId, Long borrowerId, Long staffId) { return bookService.issueBook(bookId, borrowerId, staffId); }
-
-    public String returnLoan(Long loanId, Long receiverId) { return bookService.returnBook(loanId, receiverId); }
 }
