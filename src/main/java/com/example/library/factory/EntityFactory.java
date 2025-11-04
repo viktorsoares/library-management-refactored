@@ -1,23 +1,22 @@
 package com.example.library.factory;
 
-import com.example.library.model.*;
+import com.example.library.model.Book;
+import com.example.library.model.Person;
+import com.example.library.service.LibraryService;
 
 public class EntityFactory {
+    private final LibraryService service;
 
-    public static Person createPerson(String type, int id, String name, String address, int phone, double salaryOrZero, int deskOrOfficeNo) {
-        switch (type.toLowerCase()) {
-            case "clerk":
-                return new Clerk(id, name, address, phone, salaryOrZero, deskOrOfficeNo);
-            case "librarian":
-                return Librarian.addLibrarian(new Librarian(id, name, address, phone, salaryOrZero, deskOrOfficeNo)) ? Librarian.getInstance() : null;
-            case "borrower":
-                return new Borrower(id, name, address, phone);
-            default:
-                throw new IllegalArgumentException("Invalid person type");
-        }
+    public EntityFactory(LibraryService service) {
+        this.service = service;
     }
 
-    public static Book createBook(int id, String title, String subject, String author, boolean issued) {
-        return new Book(id, title, subject, author, issued);
+    public Book createAndSaveBook(String title, String author, String subject, String publisher,
+                                  String ISBN, String edition, int year, double price, int pages) {
+        return service.addBook(title, author, subject, publisher, ISBN, edition, year, price, pages);
+    }
+
+    public Person createAndSavePerson(String name, String address, String phone, String role, String password) {
+        return service.addPerson(name, address, phone, role, password);
     }
 }

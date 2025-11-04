@@ -1,19 +1,38 @@
 package com.example.library.model;
 
-import java.util.ArrayList;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.util.List;
+
+@Entity
+@DiscriminatorValue("borrower")
+@Getter
+@Setter
 public class Borrower extends Person {
-    private ArrayList<Loan> borrowedBooks = new ArrayList<>();
-    private ArrayList<HoldRequest> holdRequests = new ArrayList<>();
+    private String email;
+    private String libraryCardNumber;
 
-    public Borrower(int id, String name, String address, int phone) {
-        super(id, name, address, phone);
+    private double totalFine;
+
+    @OneToMany(mappedBy = "person")
+    private List<Loan> loans;
+
+    public Borrower() {
     }
 
-    public void addBorrowedBook(Loan loan) { borrowedBooks.add(loan); }
-    public ArrayList<Loan> getBorrowedBooks() { return borrowedBooks; }
+    public Borrower(String name, String address, String phone, String email, String libraryCardNumber) {
+        super(name, address, phone, email);
+        this.email = email;
+        this.libraryCardNumber = libraryCardNumber;
+    }
 
-    public void addHoldRequest(HoldRequest hr) { holdRequests.add(hr); }
-    public void removeHoldRequest(HoldRequest hr) { holdRequests.remove(hr); }
-    public ArrayList<HoldRequest> getHoldRequests() { return holdRequests; }
+    @Override
+    public void printInfo() {
+        System.out.printf("Borrower: %s | Card: %s | Email: %s\n", getName(), libraryCardNumber, email);
+    }
+
 }

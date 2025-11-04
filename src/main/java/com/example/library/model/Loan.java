@@ -1,36 +1,67 @@
 package com.example.library.model;
 
-import java.util.Date;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "LOAN")
+@Setter
+@Getter
 public class Loan {
-    private Borrower borrower;
-    private Book book;
-    private Staff issuer;
-    private Staff receiver;
-    private Date issuedDate;
-    private Date returnDate;
-    private boolean fineStatus;
 
-    public Loan(Borrower borrower, Book book, Staff issuer, Staff receiver, Date issuedDate, Date returnDate, boolean fineStatus) {
-        this.borrower = borrower;
-        this.book = book;
-        this.issuer = issuer;
-        this.receiver = receiver;
-        this.issuedDate = issuedDate;
-        this.returnDate = returnDate;
-        this.fineStatus = fineStatus;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Temporal(TemporalType.DATE)
+    private LocalDate issueDate;
+
+    @Temporal(TemporalType.DATE)
+    private LocalDate dueDate;
+
+    @Temporal(TemporalType.DATE)
+    private LocalDate returnDate;
+
+    @ManyToOne
+    @JoinColumn(name = "BOOK_ID")
+    private Book book;
+
+    @ManyToOne
+    @JoinColumn(name = "PERSON_ID")
+    private Person borrower;
+
+    private boolean finePaid;
+    private boolean copyReturned;
+    private double amount;
+
+    public Loan() {
     }
 
-    public Borrower getBorrower() { return borrower; }
-    public Book getBook() { return book; }
-    public Staff getIssuer() { return issuer; }
-    public Staff getReceiver() { return receiver; }
-    public Date getIssuedDate() { return issuedDate; }
-    public Date getReturnDate() { return returnDate; }
-    public boolean getFineStatus() { return fineStatus; }
+    public Loan(LocalDate issueDate, LocalDate dueDate) {
+        this.issueDate = issueDate;
+        this.dueDate = dueDate;
+        this.finePaid = false;
+        this.copyReturned = false;
+        this.amount = 0.0;
+    }
 
-    public double computeFine1() {
-        // placeholder: pode ser refatorado com Strategy Pattern
-        return 0;
+    public double computeFine() {
+        return amount;
+    }
+
+    public void printInfo() {
+        System.out.printf("Loan: Issued %s | Due %s | Returned %s | Fine Paid: %s\n",
+                issueDate, dueDate, returnDate != null ? returnDate : "--", finePaid ? "Yes" : "No");
     }
 }

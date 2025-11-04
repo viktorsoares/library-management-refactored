@@ -1,26 +1,30 @@
 package com.example.library.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
-@Getter
-@Setter
+@Entity
+@DiscriminatorValue("LIBRARIAN")
 public class Librarian extends Staff {
-    public int officeNo;
-    @Getter
-    private static Librarian instance;
 
-    public Librarian(int id, String name, String address, int phone, double salary, int officeNo) {
-        super(id, name, address, phone, salary);
+    @Column(name = "OFFICE_NO")
+    private int officeNo;
+
+    public Librarian() {
+    }
+
+    public Librarian(String name, String address, String phone, double salary, int officeNo) {
+        super(name, address, phone, salary);
         this.officeNo = officeNo;
     }
 
-    public static boolean addLibrarian(Librarian lib) {
-        if (instance == null) {
-            instance = lib;
-            return true;
-        }
-        return false;
+    public int getOfficeNo() {
+        return officeNo;
     }
 
+    @Override
+    public void printInfo() {
+        System.out.printf("Librarian: %s | Office: %d\n", getName(), getOfficeNo());
+    }
 }

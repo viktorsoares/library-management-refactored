@@ -1,10 +1,32 @@
 package com.example.library.model;
 
-public class Clerk extends Staff {
-    public int deskNo;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.Getter;
 
-    public Clerk(int id, String name, String address, int phone, double salary, int deskNo) {
-        super(id, name, address, phone, salary);
+@Getter
+@Entity
+@DiscriminatorValue("clerk")
+public class Clerk extends Staff {
+
+    @Column(name = "DESK_NO")
+    private int deskNo;
+
+    public Clerk() {
+    }
+
+    public Clerk(String name, String address, String phone, double salary, int deskNo) {
+        super(name, address, phone, salary);
         this.deskNo = deskNo;
     }
+
+    @Override
+    public void printInfo() {
+        System.out.printf("Clerk: %s | Desk: %d\n", getName(), getDeskNo());
+    }
 }
+
+
+

@@ -1,38 +1,49 @@
 package com.example.library.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@MappedSuperclass
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter
+@Setter
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "role", discriminatorType = DiscriminatorType.STRING)
 public abstract class Person {
-    private static int IDCounter = 0;
-    private int id;
-    private String name;
-    private String address;
-    private int phoneNumber;
-    private String password;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    protected int id;
 
-    public Person(int id, String name, String address, int phoneNumber) {
-        if (id == -1) {
-            this.id = ++IDCounter;
-        } else {
-            this.id = id;
-            if (id > IDCounter) IDCounter = id;
-        }
-        this.name = name;
-        this.address = address;
-        this.phoneNumber = phoneNumber;
-        this.password = "1"; // default password
+    private String name;
+    private String password;
+    private String address;
+    private String phone;
+    private String email;
+
+    @OneToMany(mappedBy = "borrower", fetch = FetchType.EAGER)
+    private List<Loan> loans;
+
+    @Column(name = "role", insertable = false, updatable = false)
+    private String role;
+
+
+    public Person() {
     }
 
-    public int getID() { return id; }
-    public String getName() { return name; }
-    public String getAddress() { return address; }
-    public int getPhoneNumber() { return phoneNumber; }
-    public String getPassword() { return password; }
+    public Person(String name, String address, String phone, String role) {
+        this.name = name;
+        this.address = address;
+        this.phone = phone;
+        this.password = "";
+        this.role = role;
+    }
 
-    public static void setIDCount(int max) { IDCounter = max; }
+    public void printInfo() {
+        System.out.printf("Person: %s | ID: %d\n", name, id);
+    }
+
 }

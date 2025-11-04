@@ -1,41 +1,71 @@
 package com.example.library.model;
 
-import java.util.ArrayList;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.time.LocalDate;
+import java.util.List;
+
+@Entity
+@Table(name = "BOOK")
+@Setter
+@Getter
 public class Book {
-    private static int IDCounter = 0;
-    private int id;
-    private String title;
-    private String subject;
-    private String author;
-    private boolean issuedStatus;
-    private ArrayList<HoldRequest> holdRequests = new ArrayList<>();
 
-    public Book(int id, String title, String subject, String author, boolean issuedStatus) {
-        if (id == -1) this.id = ++IDCounter;
-        else {
-            this.id = id;
-            if (id > IDCounter) IDCounter = id;
-        }
-        this.title = title;
-        this.subject = subject;
-        this.author = author;
-        this.issuedStatus = issuedStatus;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String title;
+    private String author;
+    private String subject;
+    private String publisher;
+    private String ISBN;
+    private String edition;
+    private int publicationYear;
+    private double price;
+    private int pages;
+    private String status;
+
+    @ManyToOne
+    @JoinColumn(name = "borrower_id")
+    private Borrower borrowedBy;
+
+    private LocalDate dueDate;
+
+    @OneToMany(mappedBy = "book")
+    private List<Loan> loans;
+
+    public Book() {
     }
 
-    public int getID() { return id; }
-    public String getTitle() { return title; }
-    public String getSubject() { return subject; }
-    public String getAuthor() { return author; }
-    public boolean getIssuedStatus() { return issuedStatus; }
-    public void setIssuedStatus(boolean status) { this.issuedStatus = status; }
-
-    public ArrayList<HoldRequest> getHoldRequests() { return holdRequests; }
-    public void addHoldRequest(HoldRequest hr) { holdRequests.add(hr); }
+    public Book(String title, String author, String subject, String publisher,
+                String ISBN, String edition, int publicationYear, double price, int pages, String status) {
+        this.title = title;
+        this.author = author;
+        this.subject = subject;
+        this.publisher = publisher;
+        this.ISBN = ISBN;
+        this.edition = edition;
+        this.publicationYear = publicationYear;
+        this.price = price;
+        this.pages = pages;
+        this.status = status;
+    }
 
     public void printInfo() {
-        System.out.printf("%s\t\t%s\t\t%s", title, author, subject);
+        System.out.printf("Book: %s | Author: %s | Status: %s\n", title, author, status);
     }
 
-    public static void setIDCount(int max) { IDCounter = max; }
+    public boolean checkAvailability() {
+        return "available".equalsIgnoreCase(status);
+    }
 }
