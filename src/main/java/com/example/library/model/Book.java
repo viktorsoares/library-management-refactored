@@ -1,5 +1,6 @@
 package com.example.library.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,6 +13,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -43,6 +45,9 @@ public class Book {
 
     @OneToMany(mappedBy = "book")
     private List<Loan> loans;
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HoldRequest> holdRequests = new ArrayList<>();
 
     public Book() {
     }

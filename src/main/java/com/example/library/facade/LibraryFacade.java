@@ -2,12 +2,14 @@ package com.example.library.facade;
 
 import com.example.library.factory.EntityFactory;
 import com.example.library.model.Book;
+import com.example.library.model.Librarian;
 import com.example.library.model.Loan;
 import com.example.library.model.Person;
 import com.example.library.service.LibraryService;
 import com.example.library.strategy.AuthorSearchStrategy;
 import com.example.library.strategy.SearchStrategy;
 import com.example.library.strategy.TitleSearchStrategy;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,6 +17,7 @@ import java.util.Optional;
 
 @Component
 public class LibraryFacade {
+    @Getter
     private final LibraryService service;
     private final EntityFactory factory;
 
@@ -75,6 +78,11 @@ public class LibraryFacade {
 
     public SearchStrategy getAuthorStrategy() {
         return new AuthorSearchStrategy(service);
+    }
+
+    public boolean addLibrarian(String name, String address, String phone, double salary, int officeNo) {
+        Librarian librarian = new Librarian(name, address, phone, salary, officeNo);
+        return service.addLibrarian(librarian);
     }
 
 

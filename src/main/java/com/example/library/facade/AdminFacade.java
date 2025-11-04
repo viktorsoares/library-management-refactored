@@ -1,6 +1,5 @@
 package com.example.library.facade;
 
-import com.example.library.model.Book;
 import com.example.library.model.Loan;
 import com.example.library.model.Person;
 import com.example.library.repository.BookRepository;

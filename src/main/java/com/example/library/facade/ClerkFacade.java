@@ -3,12 +3,15 @@ package com.example.library.facade;
 import com.example.library.model.Book;
 import com.example.library.model.Borrower;
 import com.example.library.model.HoldRequest;
+import com.example.library.model.Person;
+import com.example.library.service.LibraryService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 @Service
@@ -16,7 +19,13 @@ public class ClerkFacade {
     @PersistenceContext
     private EntityManager em;
 
+    private final LibraryService service;
+
     private final Scanner scanner = new Scanner(System.in);
+
+    public ClerkFacade(LibraryService service) {
+        this.service = service;
+    }
 
     public void searchBook() {
         System.out.println("Enter search keyword (title or author): ");
@@ -40,10 +49,10 @@ public class ClerkFacade {
 
     public void placeHold() {
         System.out.print("Enter Book ID to place on hold: ");
-        Long bookId = Long.parseLong(scanner.nextLine().trim());
+        Long bookId = service.validateLongInput(scanner.nextLine().trim());
 
         System.out.print("Enter Borrower ID: ");
-        Long borrowerId = Long.parseLong(scanner.nextLine().trim());
+        Long borrowerId = service.validateLongInput(scanner.nextLine().trim());
 
         Book book = em.find(Book.class, bookId);
         Borrower borrower = em.find(Borrower.class, borrowerId);
@@ -58,6 +67,13 @@ public class ClerkFacade {
             return;
         }
 
+        service.expireOldHoldRequests(book, 3);
+
+        if (service.hasExistingHold(book, borrower)) {
+            System.out.println(" Borrower already has a hold request for this book.");
+            return;
+        }
+
         HoldRequest hold = new HoldRequest();
         hold.setBook(book);
         hold.setBorrower(borrower);
@@ -65,13 +81,13 @@ public class ClerkFacade {
 
         em.persist(hold);
 
-        System.out.println(" Hold placed successfully for book '" + book.getTitle() + "' by borrower '" + borrower.getName() + "'.");
+        System.out.printf(" Hold placed successfully for book '%s' by borrower '%s'.\n", book.getTitle(), borrower.getName());
     }
 
 
     public void viewBorrowerInfo() {
         System.out.print("Enter Borrower ID: ");
-        Long borrowerId = Long.parseLong(scanner.nextLine().trim());
+        Long borrowerId = service.validateLongInput(scanner.nextLine().trim());
 
         Borrower borrower = em.find(Borrower.class, borrowerId);
 
@@ -85,20 +101,20 @@ public class ClerkFacade {
 
     public void viewBorrowerFine() {
         System.out.print("Enter Borrower ID: ");
-        Long borrowerId = Long.parseLong(scanner.nextLine().trim());
+        Long borrowerId = service.validateLongInput(scanner.nextLine().trim());
 
         Borrower borrower = em.find(Borrower.class, borrowerId);
 
         if (borrower == null) {
             System.out.println(" Borrower not found.");
         } else {
-            System.out.printf("💰 Total Fine for %s: R$ %.2f\n", borrower.getName(), borrower.getTotalFine());
+            System.out.printf(" Total Fine for %s: R$ %.2f\n", borrower.getName(), borrower.getTotalFine());
         }
     }
 
     public void viewHoldQueue() {
         System.out.print("Enter Book ID: ");
-        Long bookId = Long.parseLong(scanner.nextLine().trim());
+        Long bookId = service.validateLongInput(scanner.nextLine().trim());
 
         Book book = em.find(Book.class, bookId);
 
@@ -125,81 +141,45 @@ public class ClerkFacade {
 
     public void checkOutBook() {
         System.out.print("Enter Book ID: ");
-        Long bookId = Long.parseLong(scanner.nextLine().trim());
+        Long bookId = service.validateLongInput(scanner.nextLine().trim());
 
         System.out.print("Enter Borrower ID: ");
-        Long borrowerId = Long.parseLong(scanner.nextLine().trim());
+        Long borrowerId = service.validateLongInput(scanner.nextLine().trim());
 
-        Book book = em.find(Book.class, bookId);
-        Borrower borrower = em.find(Borrower.class, borrowerId);
+        boolean success = service.loanBook(bookId, borrowerId);
 
-        if (book == null || borrower == null) {
-            System.out.println(" Book or Borrower not found.");
-            return;
+        if (success) {
+            System.out.println(" Book issued successfully.");
+        } else {
+            System.out.println(" Could not issue book. Check availability or hold queue.");
         }
-
-        if (!book.getStatus().equalsIgnoreCase("available")) {
-            System.out.println(" Book is not available for checkout.");
-            return;
-        }
-
-        book.setStatus("borrowed");
-        book.setBorrowedBy(borrower);
-        book.setDueDate(LocalDate.now().plusDays(14));
-
-        em.merge(book);
-
-        System.out.printf(" Book '%s' checked out to %s. Due in 14 days.\n", book.getTitle(), borrower.getName());
     }
 
     public void checkInBook() {
         System.out.print("Enter Book ID to check in: ");
-        Long bookId = Long.parseLong(scanner.nextLine().trim());
+        Long bookId = service.validateLongInput(scanner.nextLine().trim());
 
-        Book book = em.find(Book.class, bookId);
+        boolean success = service.returnBook(bookId);
 
-        if (book == null) {
-            System.out.println(" Book not found.");
-            return;
+        if (success) {
+            System.out.println(" Book returned successfully.");
+        } else {
+            System.out.println(" Could not return book. Check if it is currently borrowed.");
         }
-
-        if (!book.getStatus().equalsIgnoreCase("borrowed")) {
-            System.out.println("ℹ Book is not currently borrowed.");
-            return;
-        }
-
-        book.setStatus("available");
-        book.setBorrowedBy(null);
-        book.setDueDate(null);
-
-        em.merge(book);
-
-        System.out.printf(" Book '%s' has been checked in and is now available.\n", book.getTitle());
     }
-
 
     public void renewBook() {
         System.out.print("Enter Book ID to renew: ");
-        Long bookId = Long.parseLong(scanner.nextLine().trim());
+        Long bookId = service.validateLongInput(scanner.nextLine().trim());
 
-        Book book = em.find(Book.class, bookId);
+        boolean success = service.renewBook(bookId, 14);
 
-        if (book == null) {
-            System.out.println(" Book not found.");
-            return;
+        if (success) {
+            System.out.println(" Book renewed successfully.");
+        } else {
+            System.out.println(" Book not found or not currently borrowed.");
         }
-
-        if (!"borrowed".equalsIgnoreCase(book.getStatus())) {
-            System.out.println(" Book is not currently borrowed.");
-            return;
-        }
-
-        book.setDueDate(book.getDueDate().plusDays(14));
-        em.merge(book);
-
-        System.out.printf(" Book '%s' renewed. New due date: %s\n", book.getTitle(), book.getDueDate());
     }
-
 
     public void addBorrower() {
         System.out.print("Enter name: ");
@@ -222,14 +202,12 @@ public class ClerkFacade {
         System.out.printf(" Borrower '%s' added successfully with ID %d.\n", name, borrower.getId());
     }
 
-
     public void updateBorrower() {
         System.out.print("Enter Borrower ID to update: ");
-        Long borrowerId = Long.parseLong(scanner.nextLine().trim());
+        Long borrowerId = service.validateLongInput(scanner.nextLine().trim());
 
-        Borrower borrower = em.find(Borrower.class, borrowerId);
-
-        if (borrower == null) {
+        Optional<Person> opt = service.findPerson(borrowerId);
+        if (opt.isEmpty() || !(opt.get() instanceof Borrower borrower)) {
             System.out.println(" Borrower not found.");
             return;
         }
@@ -247,7 +225,6 @@ public class ClerkFacade {
         if (!phone.isEmpty()) borrower.setPhone(phone);
 
         em.merge(borrower);
-
         System.out.println(" Borrower information updated successfully.");
     }
 

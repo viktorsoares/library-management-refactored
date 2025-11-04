@@ -41,6 +41,15 @@ public class Loan {
     @JoinColumn(name = "PERSON_ID")
     private Person borrower;
 
+    @ManyToOne
+    @JoinColumn(name = "ISSUER_ID")
+    private Staff issuer;
+
+    @ManyToOne
+    @JoinColumn(name = "RECEIVER_ID")
+    private Staff receiver;
+
+
     private boolean finePaid;
     private boolean copyReturned;
     private double amount;

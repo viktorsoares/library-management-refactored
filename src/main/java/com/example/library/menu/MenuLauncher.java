@@ -14,6 +14,6 @@ public class MenuLauncher implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        mainMenu.show(); //
+        mainMenu.show();
     }
 }

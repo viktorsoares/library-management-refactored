@@ -52,5 +52,4 @@ public class ClerkFactory implements PersonFactory {
         }
     }
 
-
 }

@@ -1,5 +1,8 @@
 package com.example.library.factory;
 
+import com.example.library.model.Book;
+import com.example.library.model.Borrower;
+import com.example.library.model.HoldRequest;
 import com.example.library.model.Librarian;
 import com.example.library.model.Person;
 import jakarta.persistence.EntityManager;
@@ -8,6 +11,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Scanner;
 
 @Service
@@ -51,4 +56,50 @@ public class LibrarianFactory implements PersonFactory {
             return null;
         }
     }
+
+    public void removeFirstHoldRequest(Book book) {
+        List<HoldRequest> queue = book.getHoldRequests();
+        if (!queue.isEmpty()) {
+            HoldRequest first = queue.get(0);
+            em.remove(first);
+            queue.remove(0);
+            em.merge(book);
+        }
+    }
+
+    public boolean hasExistingHold(Book book, Borrower borrower) {
+        return book.getHoldRequests().stream()
+                .anyMatch(hr -> hr.getBorrower().equals(borrower));
+    }
+
+    public void expireOldHoldRequests(Book book, int expiryDays) {
+        LocalDate today = LocalDate.now();
+        List<HoldRequest> expired = book.getHoldRequests().stream()
+                .filter(hr -> hr.getRequestDate().plusDays(expiryDays).isBefore(today))
+                .toList();
+
+        for (HoldRequest hr : expired) {
+            em.remove(hr);
+            book.getHoldRequests().remove(hr);
+        }
+
+        em.merge(book);
+    }
+
+    @Transactional
+    public boolean addLibrarian(Librarian librarian) {
+        List<Librarian> existing = em.createQuery("""
+                SELECT l FROM Librarian l
+                """, Librarian.class).getResultList();
+
+        if (existing.isEmpty()) {
+            em.persist(librarian);
+            return true;
+        } else {
+            System.out.println(" A librarian already exists. Cannot create another.");
+            return false;
+        }
+    }
+
+
 }
