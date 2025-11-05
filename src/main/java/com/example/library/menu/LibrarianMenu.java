@@ -24,7 +24,7 @@ public class LibrarianMenu extends MenuTemplate {
     @Override
     protected void printHeader() {
         MessagePrinter.header("Welcome to Librarian's Portal");
-        System.out.println("Following Functionalities are available:");
+        System.out.println("Following Functionalities are available:\n");
     }
 
     @Override

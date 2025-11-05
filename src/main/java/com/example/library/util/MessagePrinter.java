@@ -35,8 +35,8 @@ public class MessagePrinter {
     }
 
     public static void header(String title) {
-        System.out.println("--------------------------------------------------------");
+        System.out.println("\n--------------------------------------------------------");
         System.out.println("\t" + title);
-        System.out.println("--------------------------------------------------------");
+        System.out.println("--------------------------------------------------------\n");
     }
 }
