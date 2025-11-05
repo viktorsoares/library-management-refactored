@@ -1,6 +1,9 @@
 package com.example.library.factory;
 
 import com.example.library.model.Book;
+import com.example.library.model.Borrower;
+import com.example.library.model.Clerk;
+import com.example.library.model.Librarian;
 import com.example.library.model.Person;
 import com.example.library.service.LibraryService;
 
@@ -18,5 +21,24 @@ public class EntityFactory {
 
     public Person createAndSavePerson(String name, String address, String phone, String role, String password) {
         return service.addPerson(name, address, phone, role, password);
+    }
+
+    public Borrower createAndSaveBorrower(String name, String email, String phone) {
+        Borrower borrower = new Borrower();
+        borrower.setName(name);
+        borrower.setEmail(email);
+        borrower.setPhone(phone);
+        borrower.setTotalFine(0.0);
+        return service.saveBorrower(borrower);
+    }
+
+    public Clerk createAndSaveClerk(String name, String address, String phone, double salary, int deskNo) {
+        Clerk clerk = new Clerk(name, address, phone, salary, deskNo);
+        return service.saveClerk(clerk);
+    }
+
+    public Librarian createAndSaveLibrarian(String name, String address, String phone, double salary, int officeNo) {
+        Librarian librarian = new Librarian(name, address, phone, salary, officeNo);
+        return service.saveLibrarian(librarian);
     }
 }

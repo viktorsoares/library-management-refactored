@@ -1,21 +1,22 @@
 package com.example.library.menu;
 
+import com.example.library.command.AddBookCommand;
+import com.example.library.command.CommandInvoker;
+import com.example.library.command.SearchBookCommand;
 import com.example.library.facade.ClerkFacade;
 import com.example.library.facade.LibrarianFacade;
-import com.example.library.facade.LibraryFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class LibrarianMenu extends MenuTemplate {
     private final ClerkFacade clerkFacade;
-    private final LibraryFacade libraryFacade;
     private final LibrarianFacade librarianFacade;
+    CommandInvoker invoker = new CommandInvoker();
 
     @Autowired
-    public LibrarianMenu(ClerkFacade clerkFacade, LibraryFacade libraryFacade, LibrarianFacade librarianFacade) {
+    public LibrarianMenu(ClerkFacade clerkFacade, LibrarianFacade librarianFacade) {
         this.clerkFacade = clerkFacade;
-        this.libraryFacade = libraryFacade;
         this.librarianFacade = librarianFacade;
     }
 
@@ -54,17 +55,17 @@ public class LibrarianMenu extends MenuTemplate {
     @Override
     protected boolean handleChoice(String choice) {
         switch (choice) {
-            case "1" -> clerkFacade.searchBook();
+            case "1" -> invoker.setCommand(new SearchBookCommand(clerkFacade));
             case "2" -> clerkFacade.placeHold();
             case "3" -> clerkFacade.viewBorrowerInfo();
             case "4" -> clerkFacade.viewBorrowerFine();
             case "5" -> clerkFacade.viewHoldQueue();
-            case "6" -> clerkFacade.checkOutBook();
-            case "7" -> clerkFacade.checkInBook();
-            case "8" -> clerkFacade.renewBook();
+            case "6" -> librarianFacade.checkOutBook();
+            case "7" -> librarianFacade.checkInBook();
+            case "8" -> librarianFacade.renewBook();
             case "9" -> clerkFacade.addBorrower();
             case "10" -> clerkFacade.updateBorrower();
-            case "11" -> librarianFacade.addNewBook();
+            case "11" -> invoker.setCommand(new AddBookCommand(librarianFacade));
             case "12" -> librarianFacade.removeBook();
             case "13" -> librarianFacade.updateBookInfo();
             case "14" -> librarianFacade.viewClerkInfo();
@@ -79,4 +80,3 @@ public class LibrarianMenu extends MenuTemplate {
         return true;
     }
 }
-

@@ -3,6 +3,10 @@ package com.example.library.facade;
 import com.example.library.model.Book;
 import com.example.library.model.Person;
 import com.example.library.service.LibraryService;
+import com.example.library.strategy.BookOperationContext;
+import com.example.library.strategy.CheckOutBookStrategy;
+import com.example.library.strategy.ReturnBookStrategy;
+import com.example.library.strategy.RenewBookStrategy;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
@@ -109,5 +113,23 @@ public class LibrarianFacade {
             System.out.println("\n--- Clerk Information ---");
             person.get().printInfo();
         }
+    }
+
+    public void checkOutBook() {
+        BookOperationContext context = new BookOperationContext();
+        context.setStrategy(new CheckOutBookStrategy(service, scanner));
+        context.execute();
+    }
+
+    public void checkInBook() {
+        BookOperationContext context = new BookOperationContext();
+        context.setStrategy(new ReturnBookStrategy(service, scanner));
+        context.execute();
+    }
+
+    public void renewBook() {
+        BookOperationContext context = new BookOperationContext();
+        context.setStrategy(new RenewBookStrategy(service, scanner));
+        context.execute();
     }
 }

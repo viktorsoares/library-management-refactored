@@ -2,6 +2,11 @@ package com.example.library.menu;
 
 import com.example.library.facade.LibraryFacade;
 import com.example.library.model.Person;
+import com.example.library.state.AdminState;
+import com.example.library.state.ClerkState;
+import com.example.library.state.LibrarianState;
+import com.example.library.state.UserContext;
+import com.example.library.state.UserState;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -44,7 +49,7 @@ public class MainMenu {
                 case "1" -> loginUser();
                 case "2" -> loginAdmin();
                 case "3" -> {
-                    System.out.println(" Exiting system...");
+                    System.out.println("🔒 Exiting system...");
                     running = false;
                 }
                 default -> System.out.println(" Invalid choice. Try again.");
@@ -54,7 +59,12 @@ public class MainMenu {
 
     private void loginUser() {
         System.out.print("Enter User ID: ");
-        Long id = Long.parseLong(scanner.nextLine().trim());
+        String input = scanner.nextLine().trim();
+        if (!input.matches("\\d+")) {
+            System.out.println(" Invalid ID.");
+            return;
+        }
+        Long id = Long.parseLong(input);
 
         System.out.print("Enter Password: ");
         String password = scanner.nextLine().trim();
@@ -72,17 +82,21 @@ public class MainMenu {
         }
 
         String role = person.getRole().toLowerCase();
-        switch (role) {
-            case "clerk" -> {
-                System.out.println(" Logged in as Clerk.");
-                clerkMenu.runMenu();
-            }
-            case "librarian" -> {
-                System.out.println(" Logged in as Librarian.");
-                librarianMenu.runMenu();
-            }
-            default -> System.out.println(" Unauthorized role: " + role);
+        UserContext context = new UserContext();
+
+        UserState state = switch (role) {
+            case "clerk" -> new ClerkState(clerkMenu);
+            case "librarian" -> new LibrarianState(librarianMenu);
+            default -> null;
+        };
+
+        if (state == null) {
+            System.out.println(" Unauthorized role: " + role);
+            return;
         }
+
+        context.setState(state);
+        context.execute();
     }
 
     private void loginAdmin() {
@@ -90,8 +104,9 @@ public class MainMenu {
         String password = scanner.nextLine().trim();
 
         if (password.equals("lib")) {
-            System.out.println(" Access granted to Admin Portal.");
-            adminMenu.runMenu();
+            UserContext context = new UserContext();
+            context.setState(new AdminState(adminMenu));
+            context.execute();
         } else {
             System.out.println(" Incorrect admin password.");
         }

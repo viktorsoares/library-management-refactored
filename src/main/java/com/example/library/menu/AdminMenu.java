@@ -3,6 +3,7 @@ package com.example.library.menu;
 import com.example.library.facade.AdminFacade;
 import com.example.library.factory.ClerkFactory;
 import com.example.library.factory.LibrarianFactory;
+import com.example.library.model.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,11 +38,11 @@ public class AdminMenu extends MenuTemplate {
     @Override
     protected void printOptions() {
         System.out.println("""
-                1- Add Clerk
-                2- Add Librarian
-                3- View Issued Books History
-                4- View All Books in Library
-                5- Logout
+                1 - Add Clerk
+                2 - Add Librarian
+                3 - View Issued Books History
+                4 - View All Books in Library
+                5 - Logout
                 ---------------------------------------------
                 Enter Choice: """);
     }
@@ -49,12 +50,24 @@ public class AdminMenu extends MenuTemplate {
     @Override
     protected boolean handleChoice(String choice) {
         switch (choice) {
-            case "1" -> clerkFactory.create(scanner, reader);
-            case "2" -> librarianFactory.create(scanner, reader);
+            case "1" -> {
+                Person clerk = clerkFactory.create(scanner, reader);
+                if (clerk != null) {
+                    System.out.printf(" Clerk created successfully. ID: %d | Password: %s\n",
+                            clerk.getId(), clerk.getPassword());
+                }
+            }
+            case "2" -> {
+                Person librarian = librarianFactory.create(scanner, reader);
+                if (librarian != null) {
+                    System.out.printf(" Librarian created successfully. ID: %d | Password: %s\n",
+                            librarian.getId(), librarian.getPassword());
+                }
+            }
             case "3" -> adminFacade.viewIssuedBooksHistory();
             case "4" -> adminFacade.viewAllBooks();
             case "5" -> {
-                System.out.println("🔒 Logging out...");
+                System.out.println(" Logging out...");
                 return false;
             }
             default -> System.out.println("Invalid choice.");

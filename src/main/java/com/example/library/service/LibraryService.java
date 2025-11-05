@@ -2,6 +2,7 @@ package com.example.library.service;
 
 import com.example.library.model.Book;
 import com.example.library.model.Borrower;
+import com.example.library.model.Clerk;
 import com.example.library.model.HoldRequest;
 import com.example.library.model.Librarian;
 import com.example.library.model.Loan;
@@ -265,5 +266,22 @@ public class LibraryService {
         }
     }
 
+    @Transactional
+    public Borrower saveBorrower(Borrower borrower) {
+        return personRepo.save(borrower);
+    }
 
+    @Transactional
+    public Clerk saveClerk(Clerk clerk) {
+        personRepo.save(clerk);
+        clerk.setPassword(String.valueOf(clerk.getId()));
+        return clerk;
+    }
+
+    @Transactional
+    public Librarian saveLibrarian(Librarian librarian) {
+        personRepo.save(librarian);
+        librarian.setPassword(String.valueOf(librarian.getId()));
+        return librarian;
+    }
 }

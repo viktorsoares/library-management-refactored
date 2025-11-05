@@ -1,10 +1,11 @@
 package com.example.library.facade;
 
-import com.example.library.model.Book;
-import com.example.library.model.Borrower;
-import com.example.library.model.HoldRequest;
-import com.example.library.model.Person;
+import com.example.library.model.*;
 import com.example.library.service.LibraryService;
+import com.example.library.strategy.BookOperationContext;
+import com.example.library.strategy.CheckOutBookStrategy;
+import com.example.library.strategy.ReturnBookStrategy;
+import com.example.library.strategy.RenewBookStrategy;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,6 @@ public class ClerkFacade {
     private EntityManager em;
 
     private final LibraryService service;
-
     private final Scanner scanner = new Scanner(System.in);
 
     public ClerkFacade(LibraryService service) {
@@ -84,7 +84,6 @@ public class ClerkFacade {
         System.out.printf(" Hold placed successfully for book '%s' by borrower '%s'.\n", book.getTitle(), borrower.getName());
     }
 
-
     public void viewBorrowerInfo() {
         System.out.print("Enter Borrower ID: ");
         Long borrowerId = service.validateLongInput(scanner.nextLine().trim());
@@ -140,45 +139,21 @@ public class ClerkFacade {
     }
 
     public void checkOutBook() {
-        System.out.print("Enter Book ID: ");
-        Long bookId = service.validateLongInput(scanner.nextLine().trim());
-
-        System.out.print("Enter Borrower ID: ");
-        Long borrowerId = service.validateLongInput(scanner.nextLine().trim());
-
-        boolean success = service.loanBook(bookId, borrowerId);
-
-        if (success) {
-            System.out.println(" Book issued successfully.");
-        } else {
-            System.out.println(" Could not issue book. Check availability or hold queue.");
-        }
+        BookOperationContext context = new BookOperationContext();
+        context.setStrategy(new CheckOutBookStrategy(service, scanner));
+        context.execute();
     }
 
     public void checkInBook() {
-        System.out.print("Enter Book ID to check in: ");
-        Long bookId = service.validateLongInput(scanner.nextLine().trim());
-
-        boolean success = service.returnBook(bookId);
-
-        if (success) {
-            System.out.println(" Book returned successfully.");
-        } else {
-            System.out.println(" Could not return book. Check if it is currently borrowed.");
-        }
+        BookOperationContext context = new BookOperationContext();
+        context.setStrategy(new ReturnBookStrategy(service, scanner));
+        context.execute();
     }
 
     public void renewBook() {
-        System.out.print("Enter Book ID to renew: ");
-        Long bookId = service.validateLongInput(scanner.nextLine().trim());
-
-        boolean success = service.renewBook(bookId, 14);
-
-        if (success) {
-            System.out.println(" Book renewed successfully.");
-        } else {
-            System.out.println(" Book not found or not currently borrowed.");
-        }
+        BookOperationContext context = new BookOperationContext();
+        context.setStrategy(new RenewBookStrategy(service, scanner));
+        context.execute();
     }
 
     public void addBorrower() {
@@ -227,5 +202,4 @@ public class ClerkFacade {
         em.merge(borrower);
         System.out.println(" Borrower information updated successfully.");
     }
-
 }
