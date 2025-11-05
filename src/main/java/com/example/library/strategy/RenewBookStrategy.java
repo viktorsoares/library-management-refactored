@@ -1,6 +1,7 @@
 package com.example.library.strategy;
 
 import com.example.library.service.LibraryService;
+import com.example.library.util.MessagePrinter;
 
 import java.util.Scanner;
 
@@ -15,15 +16,15 @@ public class RenewBookStrategy implements BookOperationStrategy {
 
     @Override
     public void execute() {
-        System.out.print("Enter Book ID to renew: ");
+        MessagePrinter.prompt("Book ID to renew");
         Long bookId = service.validateLongInput(scanner.nextLine().trim());
 
         boolean success = service.renewBook(bookId, 14);
 
         if (success) {
-            System.out.println(" Book renewed successfully.");
+            MessagePrinter.success("Book renewed successfully.");
         } else {
-            System.out.println(" Book not found or not currently borrowed.");
+            MessagePrinter.error("Book not found or not currently borrowed.");
         }
     }
 }

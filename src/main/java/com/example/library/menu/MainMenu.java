@@ -1,12 +1,13 @@
 package com.example.library.menu;
 
-import com.example.library.facade.LibraryFacade;
 import com.example.library.model.Person;
+import com.example.library.service.LibraryService;
 import com.example.library.state.AdminState;
 import com.example.library.state.ClerkState;
 import com.example.library.state.LibrarianState;
 import com.example.library.state.UserContext;
 import com.example.library.state.UserState;
+import com.example.library.util.MessagePrinter;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -18,23 +19,22 @@ public class MainMenu {
     private final AdminMenu adminMenu;
     private final ClerkMenu clerkMenu;
     private final LibrarianMenu librarianMenu;
-    private final LibraryFacade libraryFacade;
+    private final LibraryService libraryService;
 
     public MainMenu(AdminMenu adminMenu, ClerkMenu clerkMenu,
-                    LibrarianMenu librarianMenu, LibraryFacade libraryFacade) {
+                    LibrarianMenu librarianMenu, LibraryService libraryService) {
         this.adminMenu = adminMenu;
         this.clerkMenu = clerkMenu;
         this.librarianMenu = librarianMenu;
-        this.libraryFacade = libraryFacade;
+        this.libraryService = libraryService;
     }
 
     public void show() {
         boolean running = true;
 
         while (running) {
+            MessagePrinter.header("Welcome to Library Management System");
             System.out.println("""
-                    Welcome to Library Management System
-                    --------------------------------------------------------
                     Following Functionalities are available:
                     
                     1 - Login
@@ -49,35 +49,35 @@ public class MainMenu {
                 case "1" -> loginUser();
                 case "2" -> loginAdmin();
                 case "3" -> {
-                    System.out.println("🔒 Exiting system...");
+                    MessagePrinter.info("Exiting system...");
                     running = false;
                 }
-                default -> System.out.println(" Invalid choice. Try again.");
+                default -> MessagePrinter.warning("Invalid choice. Try again.");
             }
         }
     }
 
     private void loginUser() {
-        System.out.print("Enter User ID: ");
+        MessagePrinter.prompt("User ID");
         String input = scanner.nextLine().trim();
         if (!input.matches("\\d+")) {
-            System.out.println(" Invalid ID.");
+            MessagePrinter.warning("Invalid ID.");
             return;
         }
         Long id = Long.parseLong(input);
 
-        System.out.print("Enter Password: ");
+        MessagePrinter.prompt("Password");
         String password = scanner.nextLine().trim();
 
-        Optional<Person> opt = libraryFacade.findPerson(id);
+        Optional<Person> opt = libraryService.findPerson(id);
         if (opt.isEmpty()) {
-            System.out.println(" User not found.");
+            MessagePrinter.error("User not found.");
             return;
         }
 
         Person person = opt.get();
         if (!password.equals(person.getPassword())) {
-            System.out.println(" Incorrect password.");
+            MessagePrinter.error("Incorrect password.");
             return;
         }
 
@@ -91,7 +91,7 @@ public class MainMenu {
         };
 
         if (state == null) {
-            System.out.println(" Unauthorized role: " + role);
+            MessagePrinter.error("Unauthorized role: " + role);
             return;
         }
 
@@ -100,7 +100,7 @@ public class MainMenu {
     }
 
     private void loginAdmin() {
-        System.out.print("Enter Admin Password: ");
+        MessagePrinter.prompt("Admin Password");
         String password = scanner.nextLine().trim();
 
         if (password.equals("lib")) {
@@ -108,7 +108,7 @@ public class MainMenu {
             context.setState(new AdminState(adminMenu));
             context.execute();
         } else {
-            System.out.println(" Incorrect admin password.");
+            MessagePrinter.error("Incorrect admin password.");
         }
     }
 }

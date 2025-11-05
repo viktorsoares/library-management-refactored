@@ -21,5 +21,3 @@ public class Staff extends Person {
         System.out.printf("Staff: %s | Salary: %.2f\n", getName(), salary);
     }
 }
-
-

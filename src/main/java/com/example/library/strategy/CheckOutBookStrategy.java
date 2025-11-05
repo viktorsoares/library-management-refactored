@@ -1,6 +1,7 @@
 package com.example.library.strategy;
 
 import com.example.library.service.LibraryService;
+import com.example.library.util.MessagePrinter;
 
 import java.util.Scanner;
 
@@ -15,18 +16,18 @@ public class CheckOutBookStrategy implements BookOperationStrategy {
 
     @Override
     public void execute() {
-        System.out.print("Enter Book ID: ");
+        MessagePrinter.prompt("Book ID");
         Long bookId = service.validateLongInput(scanner.nextLine().trim());
 
-        System.out.print("Enter Borrower ID: ");
+        MessagePrinter.prompt("Borrower ID");
         Long borrowerId = service.validateLongInput(scanner.nextLine().trim());
 
         boolean success = service.loanBook(bookId, borrowerId);
 
         if (success) {
-            System.out.println(" Book issued successfully.");
+            MessagePrinter.success("Book issued successfully.");
         } else {
-            System.out.println(" Could not issue book. Check availability or hold queue.");
+            MessagePrinter.error("Could not issue book. Check availability or hold queue.");
         }
     }
 }

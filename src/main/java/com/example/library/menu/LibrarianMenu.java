@@ -5,6 +5,7 @@ import com.example.library.command.CommandInvoker;
 import com.example.library.command.SearchBookCommand;
 import com.example.library.facade.ClerkFacade;
 import com.example.library.facade.LibrarianFacade;
+import com.example.library.util.MessagePrinter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class LibrarianMenu extends MenuTemplate {
     private final ClerkFacade clerkFacade;
     private final LibrarianFacade librarianFacade;
-    CommandInvoker invoker = new CommandInvoker();
+    private final CommandInvoker invoker = new CommandInvoker();
 
     @Autowired
     public LibrarianMenu(ClerkFacade clerkFacade, LibrarianFacade librarianFacade) {
@@ -22,12 +23,8 @@ public class LibrarianMenu extends MenuTemplate {
 
     @Override
     protected void printHeader() {
-        System.out.println("""
-                --------------------------------------------------------
-                \tWelcome to Librarian's Portal
-                --------------------------------------------------------
-                Following Functionalities are available:
-                """);
+        MessagePrinter.header("Welcome to Librarian's Portal");
+        System.out.println("Following Functionalities are available:");
     }
 
     @Override
@@ -55,7 +52,10 @@ public class LibrarianMenu extends MenuTemplate {
     @Override
     protected boolean handleChoice(String choice) {
         switch (choice) {
-            case "1" -> invoker.setCommand(new SearchBookCommand(clerkFacade));
+            case "1" -> {
+                invoker.setCommand(new SearchBookCommand(clerkFacade));
+                invoker.run();
+            }
             case "2" -> clerkFacade.placeHold();
             case "3" -> clerkFacade.viewBorrowerInfo();
             case "4" -> clerkFacade.viewBorrowerFine();
@@ -65,17 +65,20 @@ public class LibrarianMenu extends MenuTemplate {
             case "8" -> librarianFacade.renewBook();
             case "9" -> clerkFacade.addBorrower();
             case "10" -> clerkFacade.updateBorrower();
-            case "11" -> invoker.setCommand(new AddBookCommand(librarianFacade));
+            case "11" -> {
+                invoker.setCommand(new AddBookCommand(librarianFacade));
+                invoker.run();
+            }
             case "12" -> librarianFacade.removeBook();
             case "13" -> librarianFacade.updateBookInfo();
             case "14" -> librarianFacade.viewClerkInfo();
             case "15" -> {
-                System.out.println(" Logging out of Librarian's Portal...");
+                MessagePrinter.info("Logging out of Librarian's Portal...");
                 return false;
             }
-            default -> System.out.println("Invalid choice. Try again.");
+            default -> MessagePrinter.warning("Invalid choice. Try again.");
         }
-        System.out.print("\nPress any key to continue...");
+        MessagePrinter.pressAnyKey();
         scanner.nextLine();
         return true;
     }

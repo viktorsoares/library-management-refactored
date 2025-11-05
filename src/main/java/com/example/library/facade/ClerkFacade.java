@@ -1,11 +1,14 @@
 package com.example.library.facade;
 
-import com.example.library.model.*;
+import com.example.library.model.Book;
+import com.example.library.model.Borrower;
+import com.example.library.model.HoldRequest;
+import com.example.library.model.Person;
 import com.example.library.service.LibraryService;
 import com.example.library.strategy.BookOperationContext;
 import com.example.library.strategy.CheckOutBookStrategy;
-import com.example.library.strategy.ReturnBookStrategy;
 import com.example.library.strategy.RenewBookStrategy;
+import com.example.library.strategy.ReturnBookStrategy;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
@@ -13,23 +16,20 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.Scanner;
 
 @Service
-public class ClerkFacade {
+public class ClerkFacade extends AbstractFacade {
     @PersistenceContext
     private EntityManager em;
 
     private final LibraryService service;
-    private final Scanner scanner = new Scanner(System.in);
 
     public ClerkFacade(LibraryService service) {
         this.service = service;
     }
 
     public void searchBook() {
-        System.out.println("Enter search keyword (title or author): ");
-        String keyword = scanner.nextLine();
+        String keyword = readRequired("search keyword (title or author)");
 
         List<Book> books = em.createQuery("""
                         SELECT b FROM Book b
@@ -48,22 +48,15 @@ public class ClerkFacade {
     }
 
     public void placeHold() {
-        System.out.print("Enter Book ID to place on hold: ");
-        Long bookId = service.validateLongInput(scanner.nextLine().trim());
-
-        System.out.print("Enter Borrower ID: ");
-        Long borrowerId = service.validateLongInput(scanner.nextLine().trim());
+        Long bookId = readValidId("Book");
+        Long borrowerId = readValidId("Borrower");
+        if (bookId == null || borrowerId == null) return;
 
         Book book = em.find(Book.class, bookId);
         Borrower borrower = em.find(Borrower.class, borrowerId);
 
-        if (book == null) {
-            System.out.println(" Book not found.");
-            return;
-        }
-
-        if (borrower == null) {
-            System.out.println(" Borrower not found.");
+        if (book == null || borrower == null) {
+            System.out.println(" Book or Borrower not found.");
             return;
         }
 
@@ -81,15 +74,15 @@ public class ClerkFacade {
 
         em.persist(hold);
 
-        System.out.printf(" Hold placed successfully for book '%s' by borrower '%s'.\n", book.getTitle(), borrower.getName());
+        System.out.printf(" Hold placed successfully for book '%s' by borrower '%s'.\n",
+                book.getTitle(), borrower.getName());
     }
 
     public void viewBorrowerInfo() {
-        System.out.print("Enter Borrower ID: ");
-        Long borrowerId = service.validateLongInput(scanner.nextLine().trim());
+        Long borrowerId = readValidId("Borrower");
+        if (borrowerId == null) return;
 
         Borrower borrower = em.find(Borrower.class, borrowerId);
-
         if (borrower == null) {
             System.out.println(" Borrower not found.");
         } else {
@@ -99,11 +92,10 @@ public class ClerkFacade {
     }
 
     public void viewBorrowerFine() {
-        System.out.print("Enter Borrower ID: ");
-        Long borrowerId = service.validateLongInput(scanner.nextLine().trim());
+        Long borrowerId = readValidId("Borrower");
+        if (borrowerId == null) return;
 
         Borrower borrower = em.find(Borrower.class, borrowerId);
-
         if (borrower == null) {
             System.out.println(" Borrower not found.");
         } else {
@@ -112,11 +104,10 @@ public class ClerkFacade {
     }
 
     public void viewHoldQueue() {
-        System.out.print("Enter Book ID: ");
-        Long bookId = service.validateLongInput(scanner.nextLine().trim());
+        Long bookId = readValidId("Book");
+        if (bookId == null) return;
 
         Book book = em.find(Book.class, bookId);
-
         if (book == null) {
             System.out.println(" Book not found.");
             return;
@@ -157,14 +148,9 @@ public class ClerkFacade {
     }
 
     public void addBorrower() {
-        System.out.print("Enter name: ");
-        String name = scanner.nextLine().trim();
-
-        System.out.print("Enter email: ");
-        String email = scanner.nextLine().trim();
-
-        System.out.print("Enter phone: ");
-        String phone = scanner.nextLine().trim();
+        String name = readRequired("name");
+        String email = readRequired("email");
+        String phone = readRequired("phone");
 
         Borrower borrower = new Borrower();
         borrower.setName(name);
@@ -178,8 +164,8 @@ public class ClerkFacade {
     }
 
     public void updateBorrower() {
-        System.out.print("Enter Borrower ID to update: ");
-        Long borrowerId = service.validateLongInput(scanner.nextLine().trim());
+        Long borrowerId = readValidId("Borrower");
+        if (borrowerId == null) return;
 
         Optional<Person> opt = service.findPerson(borrowerId);
         if (opt.isEmpty() || !(opt.get() instanceof Borrower borrower)) {
@@ -187,16 +173,13 @@ public class ClerkFacade {
             return;
         }
 
-        System.out.print("Enter new name (leave blank to keep current): ");
-        String name = scanner.nextLine().trim();
+        String name = readOptional("name");
         if (!name.isEmpty()) borrower.setName(name);
 
-        System.out.print("Enter new email (leave blank to keep current): ");
-        String email = scanner.nextLine().trim();
+        String email = readOptional("email");
         if (!email.isEmpty()) borrower.setEmail(email);
 
-        System.out.print("Enter new phone (leave blank to keep current): ");
-        String phone = scanner.nextLine().trim();
+        String phone = readOptional("phone");
         if (!phone.isEmpty()) borrower.setPhone(phone);
 
         em.merge(borrower);

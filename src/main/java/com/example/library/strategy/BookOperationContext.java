@@ -1,5 +1,7 @@
 package com.example.library.strategy;
 
+import com.example.library.util.MessagePrinter;
+
 public class BookOperationContext {
     private BookOperationStrategy strategy;
 
@@ -11,7 +13,7 @@ public class BookOperationContext {
         if (strategy != null) {
             strategy.execute();
         } else {
-            System.out.println("⚠ No strategy defined.");
+            MessagePrinter.warning("No strategy defined.");
         }
     }
 }

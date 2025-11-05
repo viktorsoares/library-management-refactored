@@ -7,6 +7,13 @@ import java.util.List;
 
 public class AuthorSearchStrategy implements SearchStrategy {
     private final LibraryService service;
-    public AuthorSearchStrategy(LibraryService service){ this.service = service; }
-    @Override public List<Book> search(String query){ return service.searchByAuthor(query); }
+
+    public AuthorSearchStrategy(LibraryService service) {
+        this.service = service;
+    }
+
+    @Override
+    public List<Book> search(String query) {
+        return service.searchByAuthor(query);
+    }
 }

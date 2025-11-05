@@ -4,6 +4,7 @@ import com.example.library.facade.AdminFacade;
 import com.example.library.factory.ClerkFactory;
 import com.example.library.factory.LibrarianFactory;
 import com.example.library.model.Person;
+import com.example.library.util.MessagePrinter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,10 +30,7 @@ public class AdminMenu extends MenuTemplate {
 
     @Override
     protected void printHeader() {
-        System.out.println("""
-                --------------------------------------------------------
-                \tWelcome to Admin's Portal
-                --------------------------------------------------------""");
+        MessagePrinter.header("Welcome to Admin's Portal");
     }
 
     @Override
@@ -53,26 +51,26 @@ public class AdminMenu extends MenuTemplate {
             case "1" -> {
                 Person clerk = clerkFactory.create(scanner, reader);
                 if (clerk != null) {
-                    System.out.printf(" Clerk created successfully. ID: %d | Password: %s\n",
-                            clerk.getId(), clerk.getPassword());
+                    MessagePrinter.success(String.format("Clerk created successfully. ID: %d | Password: %s",
+                            clerk.getId(), clerk.getPassword()));
                 }
             }
             case "2" -> {
                 Person librarian = librarianFactory.create(scanner, reader);
                 if (librarian != null) {
-                    System.out.printf(" Librarian created successfully. ID: %d | Password: %s\n",
-                            librarian.getId(), librarian.getPassword());
+                    MessagePrinter.success(String.format("Librarian created successfully. ID: %d | Password: %s",
+                            librarian.getId(), librarian.getPassword()));
                 }
             }
             case "3" -> adminFacade.viewIssuedBooksHistory();
             case "4" -> adminFacade.viewAllBooks();
             case "5" -> {
-                System.out.println(" Logging out...");
+                MessagePrinter.info("Logging out...");
                 return false;
             }
-            default -> System.out.println("Invalid choice.");
+            default -> MessagePrinter.warning("Invalid choice.");
         }
-        System.out.print("\nPress any key to continue...");
+        MessagePrinter.pressAnyKey();
         scanner.nextLine();
         return true;
     }

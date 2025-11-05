@@ -1,6 +1,7 @@
 package com.example.library.menu;
 
 import com.example.library.facade.ClerkFacade;
+import com.example.library.util.MessagePrinter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,10 +16,7 @@ public class ClerkMenu extends MenuTemplate {
 
     @Override
     protected void printHeader() {
-        System.out.println("""
-                --------------------------------------------------------
-                \tWelcome to Clerk's Portal
-                --------------------------------------------------------""");
+        MessagePrinter.header("Welcome to Clerk's Portal");
     }
 
     @Override
@@ -53,12 +51,12 @@ public class ClerkMenu extends MenuTemplate {
             case "9" -> clerkFacade.addBorrower();
             case "10" -> clerkFacade.updateBorrower();
             case "11" -> {
-                System.out.println(" Logging out of Clerk's Portal...");
+                MessagePrinter.info("Logging out of Clerk's Portal...");
                 return false;
             }
-            default -> System.out.println("Invalid choice. Try again.");
+            default -> MessagePrinter.warning("Invalid choice. Try again.");
         }
-        System.out.print("\nPress any key to continue...");
+        MessagePrinter.pressAnyKey();
         scanner.nextLine();
         return true;
     }
