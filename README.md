@@ -2,13 +2,27 @@
 
 Este projeto é uma **refatoração do Library Management System original** disponível em [Library-Management-System-JAVA](https://github.com/harismuneer/Library-Management-System-JAVA). O objetivo é modernizar a aplicação, aplicando princípios de **Clean Architecture**, **padrões de projeto (GoF)** e boas práticas de **Spring Boot**.
 
-## Objetivo do Projeto
+#  Objetivo do Projeto
 
-* Transformar o código legado, altamente acoplado e procedural, em uma arquitetura modular e testável.
-* Separar responsabilidades entre camadas: **Model** (domínio), **Repository** (persistência), **Service** (lógica de negócio), **Facade** (integração) e **Web** (REST API).
-* Aplicar padrões de projeto como **Strategy** (políticas de empréstimo), **Factory** (criação de entidades), **Observer** (eventos de empréstimo/devolução) e **Facade** (API unificada).
-* Melhorar **reusabilidade, manutenibilidade e testabilidade** do sistema.
-* Substituir entrada/saída baseada em console por **endpoints REST**, utilizando Spring Boot.
+- **Refatorar o sistema legado _Library Management System_**, originalmente procedural e fortemente acoplado, transformando-o em uma aplicação **modular, coesa e orientada a objetos**.
+
+- **Organizar o código em camadas bem definidas**, separando responsabilidades entre:
+   - **Domain (Model)** → entidades e regras de negócio puras;
+   - **Repository** → abstração da persistência dos dados;
+   - **Service** → execução dos casos de uso e orquestração das regras do domínio;
+   - **Facade** → interface intermediária entre a camada de aplicação e a interface do usuário;
+   - **Presentation (CLI)** → menus e interação com o usuário.
+
+- **Aplicar padrões de projeto GoF** adequados aos principais problemas do código legado:
+   - **Strategy** → encapsular diferentes estratégias de operação sobre livros (empréstimo, devolução, renovação);
+   - **Factory** → centralizar a criação de entidades e perfis de usuário;
+   - **Command** → estruturar as ações de menu de forma extensível e desacoplada;
+   - **State** → controlar o fluxo de interação de acordo com o papel do usuário (administrador, atendente, bibliotecário);
+   - **Facade** → oferecer uma API unificada e reduzir o acoplamento entre interface e regras de negócio.
+
+- Melhorar **reusabilidade, manutenibilidade e testabilidade**, possibilitando a evolução futura para novas interfaces, como **APIs REST ou aplicações web**, sem alterações no núcleo de domínio.
+
+- Manter a interação em **linha de comando (CLI)**, mas com uma arquitetura **preparada para evolução**, permitindo substituir facilmente o terminal por uma camada REST no futuro, graças à clara separação de camadas e contratos.
 
 ## Funcionalidades
 
@@ -25,7 +39,7 @@ Este projeto é uma **refatoração do Library Management System original** disp
 * **Spring Data JPA**
 * **H2 Database** (em memória)
 * **Clean Architecture / Hexagonal / DDD leve**
-* **Padrões GoF**: Strategy, Factory, Observer, Facade
+* **Padrões GoF**: Strategy, Factory, Command, Facade, state
 
 ## Benefícios da Refatoração
 
