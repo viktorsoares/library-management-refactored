@@ -6,13 +6,13 @@ import jakarta.persistence.Entity;
 @Entity
 @DiscriminatorValue("staff")
 public class Staff extends Person {
-    private double salary;
+    private Double salary;
 
     public Staff() {
     }
 
-    public Staff(String name, String address, String phone, double salary) {
-        super(name, address, phone, "staff");
+    public Staff(String name, String address, String phone, String email, Double salary) {
+        super(name, address, phone, email, "staff");
         this.salary = salary;
     }
 

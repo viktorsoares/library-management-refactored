@@ -29,13 +29,16 @@ public class ClerkFactory implements PersonFactory {
             System.out.println("Enter Phone Number: ");
             String phone = scanner.nextLine();
 
+            System.out.println("Enter Phone email: ");
+            String email = scanner.nextLine();
+
             System.out.println("Enter Salary: ");
-            double salary = Double.parseDouble(scanner.nextLine());
+            Double salary = Double.parseDouble(scanner.nextLine());
 
             System.out.println("Enter Desk No: ");
             int deskNo = Integer.parseInt(scanner.nextLine());
 
-            Clerk clerk = new Clerk(name, address, phone, salary, deskNo);
+            Clerk clerk = new Clerk(name, address, phone, email, salary, deskNo);
 
             em.persist(clerk);
 

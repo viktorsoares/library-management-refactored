@@ -31,6 +31,9 @@ public class LibrarianFactory implements PersonFactory {
             System.out.println("Enter Address: ");
             String address = reader.readLine();
 
+            System.out.println("Enter Email: ");
+            String email = reader.readLine();
+
             System.out.println("Enter Phone Number: ");
             String phone = scanner.nextLine();
 
@@ -40,7 +43,7 @@ public class LibrarianFactory implements PersonFactory {
             System.out.println("Enter Office No: ");
             int officeNo = Integer.parseInt(scanner.nextLine());
 
-            Librarian librarian = new Librarian(name, address, phone, salary, officeNo);
+            Librarian librarian = new Librarian(name, address, phone, email, salary, officeNo);
 
             em.persist(librarian);
 

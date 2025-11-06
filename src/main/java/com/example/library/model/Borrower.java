@@ -13,10 +13,9 @@ import java.util.List;
 @Getter
 @Setter
 public class Borrower extends Person {
-    private String email;
-    private String libraryCardNumber;
 
-    private double totalFine;
+    private String libraryCardNumber;
+    private Double totalFine;
 
     @OneToMany(mappedBy = "person")
     private List<Loan> loans;
@@ -25,14 +24,15 @@ public class Borrower extends Person {
     }
 
     public Borrower(String name, String address, String phone, String email, String libraryCardNumber) {
-        super(name, address, phone, email);
-        this.email = email;
+        super(name, address, phone, email, "borrower");
         this.libraryCardNumber = libraryCardNumber;
     }
 
     @Override
     public void printInfo() {
-        System.out.printf("Borrower: %s | Card: %s | Email: %s\n", getName(), libraryCardNumber, email);
+        System.out.printf("Borrower: %s | Card: %s | Email: %s\n",
+                getName(),
+                libraryCardNumber != null ? libraryCardNumber : "--",
+                getEmail() != null ? getEmail() : "--");
     }
-
 }

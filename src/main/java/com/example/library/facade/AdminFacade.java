@@ -1,12 +1,13 @@
 package com.example.library.facade;
 
 import com.example.library.model.Loan;
-import com.example.library.model.Person;
 import com.example.library.repository.BookRepository;
 import com.example.library.repository.LoanRepository;
+import com.example.library.util.MessagePrinter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -25,38 +26,42 @@ public class AdminFacade {
     }
 
     public void viewIssuedBooksHistory() {
-        List<Person> people = em.createQuery("SELECT p FROM Person p", Person.class).getResultList();
+        List<Loan> loans = loanRepository.findAll();
 
-        System.out.println("\n--- Issued Books History by Person ---");
-        for (Person person : people) {
-            List<Loan> loans = person.getLoans();
-            if (loans != null && !loans.isEmpty()) {
-                System.out.printf("Borrower: %s (ID: %d)\n", person.getName(), person.getId());
-                for (Loan loan : loans) {
-                    System.out.printf("  Loan ID: %d | Book: %s | Issued: %s | Returned: %s\n",
-                            loan.getId(),
-                            loan.getBook() != null ? loan.getBook().getTitle() : "N/A",
-                            loan.getIssueDate(),
-                            loan.getReturnDate() != null ? loan.getReturnDate() : "--");
-                }
-                System.out.println();
-            }
+        MessagePrinter.separator("Issued Books History by Person");
+
+        if (CollectionUtils.isEmpty(loans)) {
+            MessagePrinter.info("No issued books found.");
+        } else {
+            loans.forEach(loan -> {
+                String borrower = loan.getBorrower() != null ? loan.getBorrower().getName() : "Unknown";
+                System.out.printf("Loan ID: %d | Book: %s | Borrower: %s | Issued: %s | Returned: %s\n",
+                        loan.getId(),
+                        loan.getBook() != null ? loan.getBook().getTitle() : "N/A",
+                        borrower,
+                        loan.getIssueDate(),
+                        loan.getReturnDate() != null ? loan.getReturnDate() : "--");
+            });
         }
     }
 
     public void viewAllBooks() {
-        List<Person> people = em.createQuery("SELECT DISTINCT p FROM Person p JOIN p.loans l WHERE l.copyReturned = false", Person.class).getResultList();
+        List<Loan> activeLoans = loanRepository.findAll().stream()
+                .filter(loan -> !loan.isCopyReturned())
+                .toList();
 
-        System.out.println("\n--- Books Currently on Loan ---");
-        for (Person person : people) {
-            for (Loan loan : person.getLoans()) {
-                if (!loan.isCopyReturned()) {
-                    System.out.printf("Book: %s | Borrower: %s | Due: %s\n",
-                            loan.getBook() != null ? loan.getBook().getTitle() : "N/A",
-                            person.getName(),
-                            loan.getDueDate());
-                }
-            }
+        MessagePrinter.separator("Books Currently on Loan");
+
+        if (CollectionUtils.isEmpty(activeLoans)) {
+            MessagePrinter.info("No books currently on loan.");
+        } else {
+            activeLoans.forEach(loan -> {
+                String borrower = loan.getBorrower() != null ? loan.getBorrower().getName() : "Unknown";
+                System.out.printf("Book: %s | Borrower: %s | Due: %s\n",
+                        loan.getBook() != null ? loan.getBook().getTitle() : "N/A",
+                        borrower,
+                        loan.getDueDate());
+            });
         }
     }
 

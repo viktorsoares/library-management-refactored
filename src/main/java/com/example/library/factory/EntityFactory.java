@@ -32,13 +32,13 @@ public class EntityFactory {
         return service.saveBorrower(borrower);
     }
 
-    public Clerk createAndSaveClerk(String name, String address, String phone, double salary, int deskNo) {
-        Clerk clerk = new Clerk(name, address, phone, salary, deskNo);
+    public Clerk createAndSaveClerk(String name, String address, String phone, String email, Double salary, int deskNo) {
+        Clerk clerk = new Clerk(name, address, phone, email, salary, deskNo);
         return service.saveClerk(clerk);
     }
 
-    public Librarian createAndSaveLibrarian(String name, String address, String phone, double salary, int officeNo) {
-        Librarian librarian = new Librarian(name, address, phone, salary, officeNo);
+    public Librarian createAndSaveLibrarian(String name, String address, String phone, String email, Double salary, int officeNo) {
+        Librarian librarian = new Librarian(name, address, phone, email, salary, officeNo);
         return service.saveLibrarian(librarian);
     }
 }

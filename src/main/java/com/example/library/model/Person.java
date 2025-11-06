@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,7 +24,7 @@ public abstract class Person {
     private String email;
 
     @OneToMany(mappedBy = "borrower", fetch = FetchType.EAGER)
-    private List<Loan> loans;
+    private List<Loan> loans = new ArrayList<>();;
 
     @Column(name = "role", insertable = false, updatable = false)
     private String role;
@@ -32,10 +33,11 @@ public abstract class Person {
     public Person() {
     }
 
-    public Person(String name, String address, String phone, String role) {
+    public Person(String name, String address, String phone, String email, String role) {
         this.name = name;
         this.address = address;
         this.phone = phone;
+        this.email = email;
         this.password = "";
         this.role = role;
     }

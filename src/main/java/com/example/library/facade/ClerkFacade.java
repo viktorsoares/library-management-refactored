@@ -9,9 +9,12 @@ import com.example.library.strategy.BookOperationContext;
 import com.example.library.strategy.CheckOutBookStrategy;
 import com.example.library.strategy.RenewBookStrategy;
 import com.example.library.strategy.ReturnBookStrategy;
+import com.example.library.util.MessagePrinter;
+import com.example.library.util.ValueFormatter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,6 +31,7 @@ public class ClerkFacade extends AbstractFacade {
         this.service = service;
     }
 
+
     public void searchBook() {
         String keyword = readRequired("search keyword (title or author)");
 
@@ -40,9 +44,9 @@ public class ClerkFacade extends AbstractFacade {
                 .getResultList();
 
         if (books.isEmpty()) {
-            System.out.println("No books found matching: " + keyword);
+            MessagePrinter.warning("No books found matching: " + keyword);
         } else {
-            System.out.println("\n--- Search Results ---");
+            MessagePrinter.separator("Search Results");
             books.forEach(Book::printInfo);
         }
     }
@@ -56,14 +60,14 @@ public class ClerkFacade extends AbstractFacade {
         Borrower borrower = em.find(Borrower.class, borrowerId);
 
         if (book == null || borrower == null) {
-            System.out.println(" Book or Borrower not found.");
+            MessagePrinter.error("Book or Borrower not found.");
             return;
         }
 
         service.expireOldHoldRequests(book, 3);
 
         if (service.hasExistingHold(book, borrower)) {
-            System.out.println(" Borrower already has a hold request for this book.");
+            MessagePrinter.info("Borrower already has a hold request for this book.");
             return;
         }
 
@@ -74,8 +78,8 @@ public class ClerkFacade extends AbstractFacade {
 
         em.persist(hold);
 
-        System.out.printf(" Hold placed successfully for book '%s' by borrower '%s'.\n",
-                book.getTitle(), borrower.getName());
+        MessagePrinter.success(String.format("Hold placed successfully for book '%s' by borrower '%s'.",
+                book.getTitle(), borrower.getName()));
     }
 
     public void viewBorrowerInfo() {
@@ -84,9 +88,9 @@ public class ClerkFacade extends AbstractFacade {
 
         Borrower borrower = em.find(Borrower.class, borrowerId);
         if (borrower == null) {
-            System.out.println(" Borrower not found.");
+            MessagePrinter.error("Borrower not found.");
         } else {
-            System.out.println("\n--- Borrower Information ---");
+            MessagePrinter.separator("Borrower Information");
             borrower.printInfo();
         }
     }
@@ -97,10 +101,13 @@ public class ClerkFacade extends AbstractFacade {
 
         Borrower borrower = em.find(Borrower.class, borrowerId);
         if (borrower == null) {
-            System.out.println(" Borrower not found.");
-        } else {
-            System.out.printf(" Total Fine for %s: R$ %.2f\n", borrower.getName(), borrower.getTotalFine());
+            MessagePrinter.error("Borrower not found.");
+            return;
         }
+
+        double fine = borrower.getTotalFine() != null ? borrower.getTotalFine() : 0.0;
+        MessagePrinter.info(String.format("Total Fine for %s: %s",
+                borrower.getName(), ValueFormatter.formatCurrency(fine)));
     }
 
     public void viewHoldQueue() {
@@ -109,7 +116,7 @@ public class ClerkFacade extends AbstractFacade {
 
         Book book = em.find(Book.class, bookId);
         if (book == null) {
-            System.out.println(" Book not found.");
+            MessagePrinter.error("Book not found.");
             return;
         }
 
@@ -122,9 +129,9 @@ public class ClerkFacade extends AbstractFacade {
                 .getResultList();
 
         if (queue.isEmpty()) {
-            System.out.println(" No hold requests for this book.");
+            MessagePrinter.info("No hold requests for this book.");
         } else {
-            System.out.println("\n--- Hold Queue ---");
+            MessagePrinter.separator("Hold Queue");
             queue.forEach(HoldRequest::print);
         }
     }
@@ -147,6 +154,7 @@ public class ClerkFacade extends AbstractFacade {
         context.execute();
     }
 
+    @Transactional
     public void addBorrower() {
         String name = readRequired("name");
         String email = readRequired("email");
@@ -160,16 +168,17 @@ public class ClerkFacade extends AbstractFacade {
 
         em.persist(borrower);
 
-        System.out.printf(" Borrower '%s' added successfully with ID %d.\n", name, borrower.getId());
+        MessagePrinter.success(String.format("Borrower '%s' added successfully with ID %d.", name, borrower.getId()));
     }
 
+    @Transactional
     public void updateBorrower() {
         Long borrowerId = readValidId("Borrower");
         if (borrowerId == null) return;
 
         Optional<Person> opt = service.findPerson(borrowerId);
         if (opt.isEmpty() || !(opt.get() instanceof Borrower borrower)) {
-            System.out.println(" Borrower not found.");
+            MessagePrinter.error("Borrower not found.");
             return;
         }
 
@@ -183,6 +192,7 @@ public class ClerkFacade extends AbstractFacade {
         if (!phone.isEmpty()) borrower.setPhone(phone);
 
         em.merge(borrower);
-        System.out.println(" Borrower information updated successfully.");
+        em.flush();
+        MessagePrinter.success("Borrower information updated successfully.");
     }
 }

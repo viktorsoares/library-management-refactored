@@ -5,17 +5,17 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 
 @Entity
-@DiscriminatorValue("LIBRARIAN")
+@DiscriminatorValue("librarian")
 public class Librarian extends Staff {
 
     @Column(name = "OFFICE_NO")
-    private int officeNo;
+    private Integer officeNo;
 
     public Librarian() {
     }
 
-    public Librarian(String name, String address, String phone, double salary, int officeNo) {
-        super(name, address, phone, salary);
+    public Librarian(String name, String address, String phone, String email, double salary, int officeNo) {
+        super(name, address, phone, email, salary);
         this.officeNo = officeNo;
     }
 
