@@ -110,7 +110,7 @@ http://localhost:8080/h2-console
 ```
 Use as credenciais padrão:
 
-- **JDBC URL:** `jdbc:h2:mem:testdb`
+- **JDBC URL:** `jdbc:h2:file:./data/librarydb`
 - **Usuário:** `sa`
 - **Senha:** *(em branco)*
 
